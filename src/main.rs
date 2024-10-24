@@ -1,6 +1,7 @@
 mod cmd {
     pub mod touch;
     pub mod ls;
+    pub mod echo;
 }
 
 use std::io::{self, Write};
@@ -8,8 +9,10 @@ use std::path::PathBuf;
 use colored::Colorize;
 use std::env;
 use clearscreen;
+
 use crate::cmd::touch::cmd_touch;
 use crate::cmd::ls::cmd_ls;
+use crate::cmd::echo::cmd_echo;
 
 fn main() {
     let mut working_dir = String::new();
@@ -56,6 +59,7 @@ fn main() {
                 println!("{}", "Thank you for using cmd utils in Rust.".green());
                 break;
             }
+            "echo" => cmd_echo(&command_vec),
             "clear" => {
                 if command_vec.len() > 1 {
                     println!("No usage of {} found in clear command.", command_vec[1].red());
