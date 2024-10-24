@@ -1,12 +1,7 @@
-pub fn cmd_echo(command_vec: &Vec<&str>){
-    let cmd_len = command_vec.len();
-    let mut idx = 1;
-    while idx < cmd_len{
-        print!("{}", command_vec[idx]);
-        if idx != cmd_len - 1 {
-            print!(" ");
-        }
-        idx += 1;
+pub fn cmd_echo(command_vec: &[&str]) {
+    if command_vec.len() <= 1 {
+        println!();
+        return;
     }
-    println!();
+    println!("{}", command_vec[1..].join(" "));
 }
