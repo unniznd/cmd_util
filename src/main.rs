@@ -2,34 +2,62 @@ mod cmd {
     pub mod touch;
     pub mod ls;
     pub mod echo;
+    pub mod cat;
 }
 
 use std::io::{self, Write};
 use std::path::PathBuf;
-use colored::Colorize;
 use std::env;
+use std::fs;
+
+use colored::Colorize;
 use clearscreen;
+
 
 use crate::cmd::touch::cmd_touch;
 use crate::cmd::ls::cmd_ls;
 use crate::cmd::echo::cmd_echo;
+use crate::cmd::cat::cmd_cat;
+
+pub fn prompt_for_directory() -> PathBuf {
+    loop {
+        let mut working_dir = String::new();
+        println!("{}", "Enter path of working directory:".green());
+
+        io::stdin()
+            .read_line(&mut working_dir)
+            .expect("Failed to read input. Try again!");
+
+        // Trim the input to remove trailing newline or whitespace
+        let working_dir = working_dir.trim();
+
+        // Get current directory
+        let curr_dir: PathBuf = env::current_dir().expect("Failed to get current directory");
+
+        // Resolve relative paths
+        let mut path: PathBuf = PathBuf::from(working_dir);
+        if working_dir.starts_with('.') {
+            path = curr_dir.join(working_dir).canonicalize().expect("Failed to resolve path");
+        }
+
+        // Try to read the directory, if successful return the path
+        match fs::read_dir(&path) {
+            Ok(_) => {
+                // If the directory is valid, break the loop and return the valid path
+                return path;
+            }
+            Err(e) => {
+                // Print error and prompt again
+                eprintln!("{}: {}", "Error reading directory".red(), e.to_string().red());
+                println!("{}", "Please enter a valid directory path.".yellow());
+            }
+        }
+    }
+}
 
 fn main() {
-    let mut working_dir = String::new();
-    println!("{}", "Enter path of working directory:".green());
 
-
-    io::stdin()
-        .read_line(&mut working_dir)
-        .expect("Failed to read input. Try again!");
-    let working_dir: &str = working_dir.trim(); 
-
-    let curr_dir: PathBuf = env::current_dir().expect("Failed to get current directory");
-    
-    let mut path: PathBuf = PathBuf::from(working_dir);
-    if working_dir.starts_with('.') {
-        path = curr_dir.join(working_dir).canonicalize().expect("Failed to resolve path");
-    }
+    let path: PathBuf = prompt_for_directory();
 
     loop {
         let mut command: String = String::new();
@@ -60,6 +88,7 @@ fn main() {
                 break;
             }
             "echo" => cmd_echo(&command_vec),
+            "cat" => cmd_cat(&command_vec, &path),
             "clear" => {
                 if command_vec.len() > 1 {
                     println!("No usage of {} found in clear command.", command_vec[1].red());
