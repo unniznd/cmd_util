@@ -3,6 +3,7 @@ mod cmd {
     pub mod ls;
     pub mod echo;
     pub mod cat;
+    pub mod find;
 }
 
 use std::io::{self, Write};
@@ -18,6 +19,7 @@ use crate::cmd::touch::cmd_touch;
 use crate::cmd::ls::cmd_ls;
 use crate::cmd::echo::cmd_echo;
 use crate::cmd::cat::cmd_cat;
+use crate::cmd::find::cmd_find;
 
 pub fn prompt_for_directory() -> PathBuf {
     loop {
@@ -75,7 +77,7 @@ fn main() {
         }
 
         match command_vec[0] {
-            "ls" => cmd_ls(&path),
+            "ls" => cmd_ls(&path, false),
             "touch" => {
                 if command_vec.len() < 2 {
                     println!("{}", "touch: missing file operand".red());
@@ -89,6 +91,7 @@ fn main() {
             }
             "echo" => cmd_echo(&command_vec),
             "cat" => cmd_cat(&command_vec, &path),
+            "find" => cmd_find(&command_vec, &path),
             "clear" => {
                 if command_vec.len() > 1 {
                     println!("No usage of {} found in clear command.", command_vec[1].red());

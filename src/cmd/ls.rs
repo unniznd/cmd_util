@@ -2,13 +2,13 @@ use std::fs;
 use std::path::PathBuf;
 use colored::Colorize;
 
-pub fn cmd_ls(working_dir: &PathBuf) {
+pub fn cmd_ls(working_dir: &PathBuf, show_hidden:bool) {
     match fs::read_dir(working_dir) {
         Ok(entries) => {
             for entry in entries.filter_map(|e| e.ok()) {
                 let path: PathBuf = entry.path();
                 if let Some(filename) = path.file_name().and_then(|name| name.to_str()) {
-                    if filename.starts_with('.') {
+                    if filename.starts_with('.') & !show_hidden {
                         continue;
                     }
                     if path.is_dir() {
